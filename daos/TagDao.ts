@@ -18,4 +18,6 @@ export default class TagDao implements TagDaoI{
         return TagDao.tagDao;
     }
     private constructor() {}
+
+    //Add DAO methods below
 }
