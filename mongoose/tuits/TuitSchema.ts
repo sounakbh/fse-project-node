@@ -1,5 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import Tuit from "../../models/tuits/Tuit";
+import TagModel from "../tags/TagModel";
+
 const TuitSchema = new mongoose.Schema<Tuit>(
   {
     tuit: { type: String, required: true },
@@ -14,7 +16,8 @@ const TuitSchema = new mongoose.Schema<Tuit>(
       retuits: { type: Number, default: 0 },
       likes: { type: Number, default: 0 },
       dislikes: { type: Number, default: 0 },
-    },
+        },
+      tags: {type: [mongoose.Schema.Types.ObjectId], ref: "TagModel"}
   },
   { collection: "tuits" }
 );
