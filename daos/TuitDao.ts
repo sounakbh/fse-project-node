@@ -46,4 +46,8 @@ export default class TuitDao implements TuitDaoI{
         );
     deleteTuit = async (uid: string): Promise<any> =>
         TuitModel.deleteOne({_id: uid});
+
+    findAllTuitsByTagID = async (tagid: string): Promise<Tuit[]> =>
+        TuitModel.find({tags: tagid});
+
 }
