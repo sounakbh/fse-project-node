@@ -1,5 +1,4 @@
 import Tag from "../models/tags/Tag";
-import mongoose from "mongoose";
 
 /**
  * @file Declares API for tags related data access object methods
