@@ -1,10 +1,15 @@
-import mongoose from "mongoose";
-import Tags from "../../models/tags/Tags";
+/**
+ * @file Define the mongoose schema for the
+ * documents in the tags collection
+ */
 
-const TagSchema = new mongoose.Schema<Tags>(
+import mongoose from "mongoose";
+import Tag from "../../models/tags/Tag";
+
+const TagSchema = new mongoose.Schema<Tag>(
     {
         tag: {type: String, required: true},
-        retags: {type: Number, default: 0}
+        frequency: {type: Number, default: 0}
     },
     { collection: "tags" }
 );
