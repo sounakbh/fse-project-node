@@ -8,15 +8,15 @@ import Tag from "../models/tags/Tag";
 
 /**
  * @class TagDao Implements Data Access Object managing data storage
- * of Users
- * @property {TagDao} TagDao Private single instance of UserDao
+ * of Tags
+ * @property {TagDao} TagDao Private single instance of TagDao
  */
 export default class TagDao implements TagDaoI {
     private static tagDao: TagDao | null = null;
 
     /**
      * Creates singleton DAO instance
-     * @returns UserDao
+     * @returns TagDao
      */
     public static getInstance = (): TagDao => {
         if (TagDao.tagDao === null) {
