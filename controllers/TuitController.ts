@@ -5,6 +5,9 @@ import TuitDao from "../daos/TuitDao";
 import Tuit from "../models/tuits/Tuit";
 import {Express, Request, Response} from "express";
 import TuitControllerI from "../interfaces/TuitControllerI";
+import TagDao from "../daos/TagDao";
+import Tag from "../models/tags/Tag";
+import {compileFunction} from "vm";
 
 /**
  * @class TuitController Implements RESTful Web service API for tuits resource.
@@ -24,6 +27,7 @@ import TuitControllerI from "../interfaces/TuitControllerI";
  */
 export default class TuitController implements TuitControllerI {
     private static tuitDao: TuitDao = TuitDao.getInstance();
+    private static tagDao: TagDao = TagDao.getInstance();
     private static tuitController: TuitController | null = null;
 
     /**
@@ -87,6 +91,10 @@ export default class TuitController implements TuitControllerI {
             .then((tuits: Tuit[]) => res.json(tuits));
     }
 
+
+    getTagIDsHelper = async() =>{
+
+    }
     /**
      * @param {Request} req Represents request from client, including body
      * containing the JSON object for the new tuit to be inserted in the
@@ -95,7 +103,7 @@ export default class TuitController implements TuitControllerI {
      * body formatted as JSON containing the new tuit that was inserted in the
      * database
      */
-    createTuitByUser = (req: Request, res: Response) => {
+    createTuitByUser = async (req: Request, res: Response) => {
         // @ts-ignore
         let userId = req.params.uid === "my" && req.session['profile'] ?
             // @ts-ignore
@@ -105,8 +113,50 @@ export default class TuitController implements TuitControllerI {
             return;
         }
 
-        TuitController.tuitDao.createTuitByUser(userId, req.body)
-            .then((tuit: Tuit) => res.json(tuit));
+        /**
+         * Steps:
+         * FindTagByName section convert into a method and reuse
+         * 1. Extract the tags if present
+         * 2. Check if the tag(s) is/are present in the tags database
+         * 3. If present extract the tagID, else create the tag record in the tag table and extract the tagID
+         * 4. Use this array of tagID as the value for tags in tuit body and use that to create tuit
+         *
+         */
+        let tags = req.body.tags
+        // console.log(tags[0])
+        const tagDao = TuitController.tagDao
+        const tagIds: any[] = []
+        let promises: any[] = []
+
+        tags?.forEach(  (tag: string) => {
+            const tagPresent = tagDao.findTagByName(tag);
+            promises.push(tagPresent)
+        })
+         Promise.all(promises).then((item) => {
+            let i = 0;
+                item.forEach(async tag => {
+                    i += 1;
+                    if(tag){
+                        const frequency = tag.frequency + 1
+                        const updateTagStatus =  await tagDao.updateTagStats(tag._id, frequency);
+                        tagIds.push(tag._id)
+                        req.body.tags = tagIds
+                    } else{
+                        const newTag = await tagDao.createNewTag(tags[i - 1])
+                        const id = await tagDao.findTagIdByTagName(tags[i-1])
+                        tagIds.push(id[0]._id)
+                        req.body.tags = tagIds
+                    }
+                })
+        }
+        );
+
+        console.log(tagIds)
+        //req.body.tags = tagIds
+        //console.log(req.body)
+        // TuitController.tuitDao.createTuitByUser(userId, req.body)
+        //     .then((tuit: Tuit) => res.json(tuit));
+        // return res.status(20)
     }
 
     /**
