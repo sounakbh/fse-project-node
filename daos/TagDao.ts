@@ -41,8 +41,8 @@ export default class TagDao implements TagDaoI {
      * @param {Tag} tags Instance to be inserted into the database
      * @returns Promise To be notified when a new tag is inserted into the database
      */
-    createNewTag = async (tag: Tag): Promise<Tag> =>
-        TagModel.create(tag);
+    createNewTag = async (tag: string): Promise<Tag> =>
+        TagModel.create({tag: tag});
 
     /**
      * Update the frequency of a particular tag in the database using TagModel

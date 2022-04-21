@@ -1,7 +1,6 @@
 /**
  * @file Controller RESTful Web service API for tuits resource
  */
-import Tuit from "../models/tuits/Tuit";
 import {Express, Request, Response} from "express";
 import TagControllerI from "../interfaces/TagControllerI";
 import TagDao from "../daos/TagDao";

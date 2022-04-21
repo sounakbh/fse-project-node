@@ -17,7 +17,7 @@ const TuitSchema = new mongoose.Schema<Tuit>(
       likes: { type: Number, default: 0 },
       dislikes: { type: Number, default: 0 },
         },
-      tags: {type: [mongoose.Schema.Types.ObjectId], ref: "TagModel"}
+      tags: {type: [mongoose.Schema.Types.ObjectId]}
   },
   { collection: "tuits" }
 );

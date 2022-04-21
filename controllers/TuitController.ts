@@ -5,6 +5,10 @@ import TuitDao from "../daos/TuitDao";
 import Tuit from "../models/tuits/Tuit";
 import {Express, Request, Response} from "express";
 import TuitControllerI from "../interfaces/TuitControllerI";
+import TagDao from "../daos/TagDao";
+import Tag from "../models/tags/Tag";
+import {compileFunction} from "vm";
+import {promises} from "dns";
 
 /**
  * @class TuitController Implements RESTful Web service API for tuits resource.
@@ -24,6 +28,7 @@ import TuitControllerI from "../interfaces/TuitControllerI";
  */
 export default class TuitController implements TuitControllerI {
     private static tuitDao: TuitDao = TuitDao.getInstance();
+    private static tagDao: TagDao = TagDao.getInstance();
     private static tuitController: TuitController | null = null;
 
     /**
@@ -87,6 +92,7 @@ export default class TuitController implements TuitControllerI {
             .then((tuits: Tuit[]) => res.json(tuits));
     }
 
+
     /**
      * @param {Request} req Represents request from client, including body
      * containing the JSON object for the new tuit to be inserted in the
@@ -95,7 +101,7 @@ export default class TuitController implements TuitControllerI {
      * body formatted as JSON containing the new tuit that was inserted in the
      * database
      */
-    createTuitByUser = (req: Request, res: Response) => {
+    createTuitByUser = async (req: Request, res: Response) => {
         // @ts-ignore
         let userId = req.params.uid === "my" && req.session['profile'] ?
             // @ts-ignore
@@ -104,9 +110,27 @@ export default class TuitController implements TuitControllerI {
             res.sendStatus(503);
             return;
         }
+        let tags = req.body.tags;
+        const tagDao = TuitController.tagDao
+        let tagIds: any[] = []
 
+        for (let tag of tags) {
+            const isTagPresent = await tagDao.findTagByName(tag);
+            if(isTagPresent) {
+                const frequency = isTagPresent.frequency + 1;
+                await tagDao.updateTagStats(isTagPresent._id, frequency);
+                tagIds.push(isTagPresent._id);
+            }
+            else {
+                await tagDao.createNewTag(tag);
+                const id = await tagDao.findTagIdByTagName(tag);
+                tagIds.push(id[0]._id)
+            }
+        }
+        req.body.tags = tagIds
         TuitController.tuitDao.createTuitByUser(userId, req.body)
             .then((tuit: Tuit) => res.json(tuit));
+        return res.status(200);
     }
 
     /**
