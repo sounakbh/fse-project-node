@@ -5,6 +5,7 @@ import Tuit from "../models/tuits/Tuit";
 import {Express, Request, Response} from "express";
 import TagControllerI from "../interfaces/TagControllerI";
 import TagDao from "../daos/TagDao";
+import Tag from "../models/tags/Tag";
 
 /**
  * @class TagController Implements RESTful Web service API for tuits resource.
@@ -22,9 +23,11 @@ import TagDao from "../daos/TagDao";
  * @property {TagController} tuitController Singleton controller implementing
  * RESTful Web service API
  */
+
 export default class TagController implements TagControllerI {
     private static tagDao: TagDao = TagDao.getInstance();
     private static tagController: TagController | null = null;
+    private static readonly NUM_TRENDING_TAGS = 3;
 
     /**
      * Creates singleton controller instance
@@ -37,8 +40,6 @@ export default class TagController implements TagControllerI {
             TagController.tagController = new TagController();
             app.get("/api/tags", TagController.tagController.findAllTags);
             app.get("/api/tags/trending", TagController.tagController.findTrendingTags);
-            app.post("/api/tags", TagController.tagController.createNewTag);
-            app.put("/api/tags/:tagId", TagController.tagController.updateTagStats);
         }
         return TagController.tagController;
     }
@@ -52,8 +53,9 @@ export default class TagController implements TagControllerI {
      * body formatted as JSON arrays containing the tuit objects
      */
     findAllTags = (req: Request, res: Response) => {
-        //  TagController.tagDao.findAllTags()
-        //             .then((tags: Tag[]) => res.json(tags));
+        console.log("Find all tags reached!")
+          return TagController.tagDao.findAllTags()
+                     .then((tags: Tag[]) => res.json(tags));
     }
 
     /**
@@ -63,9 +65,10 @@ export default class TagController implements TagControllerI {
      * body formatted as JSON containing the tuit that matches the user ID
      */
     findTrendingTags = (req: Request, res: Response) => {
-        //  TagController.tagDao.findTrendingTags()
-        //             .then((tags: Tag[]) => res.json(tags));
+        return TagController.tagDao. findTrendingTags(TagController.NUM_TRENDING_TAGS)
+                     .then((tags: Tag[]) => res.json(tags));
     }
+
     /**
      * @param {Request} req Represents request from client, including body
      * containing the JSON object for the new tuit to be inserted in the
