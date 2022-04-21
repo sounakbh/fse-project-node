@@ -8,6 +8,7 @@ import TuitControllerI from "../interfaces/TuitControllerI";
 import TagDao from "../daos/TagDao";
 import Tag from "../models/tags/Tag";
 import {compileFunction} from "vm";
+import {promises} from "dns";
 
 /**
  * @class TuitController Implements RESTful Web service API for tuits resource.
@@ -92,7 +93,29 @@ export default class TuitController implements TuitControllerI {
     }
 
 
-    getTagIDsHelper = async() =>{
+    getTagIDsHelper = async(promises: any[], tags: any[]) =>{
+        const tagIds: any[] = []
+        const tagDao = TuitController.tagDao
+
+        return Promise.all(promises).then((item) => {
+                let i = 0;
+                item.forEach(async tag => {
+                    i += 1;
+                    if(tag){
+                        const frequency = tag.frequency + 1
+                        tagIds.push(tag._id)
+                        const updateTagStatus =  await tagDao.updateTagStats(tag._id, frequency);
+                    } else{
+                        const newTag = await tagDao.createNewTag(tags[i - 1])
+                        const id = await tagDao.findTagIdByTagName(tags[i-1])
+                        tagIds.push(id[0]._id)
+
+                    }
+                })
+                console.log('Tag IDs from get tag ids helper:', tagIds);
+                return tagIds;
+            }
+        );
 
     }
     /**
@@ -112,51 +135,28 @@ export default class TuitController implements TuitControllerI {
             res.sendStatus(503);
             return;
         }
-
-        /**
-         * Steps:
-         * FindTagByName section convert into a method and reuse
-         * 1. Extract the tags if present
-         * 2. Check if the tag(s) is/are present in the tags database
-         * 3. If present extract the tagID, else create the tag record in the tag table and extract the tagID
-         * 4. Use this array of tagID as the value for tags in tuit body and use that to create tuit
-         *
-         */
-        let tags = req.body.tags
-        // console.log(tags[0])
+        let tags = req.body.tags;
         const tagDao = TuitController.tagDao
-        const tagIds: any[] = []
-        let promises: any[] = []
+        let tagIds: any[] = []
 
-        tags?.forEach(  (tag: string) => {
-            const tagPresent = tagDao.findTagByName(tag);
-            promises.push(tagPresent)
-        })
-         Promise.all(promises).then((item) => {
-            let i = 0;
-                item.forEach(async tag => {
-                    i += 1;
-                    if(tag){
-                        const frequency = tag.frequency + 1
-                        const updateTagStatus =  await tagDao.updateTagStats(tag._id, frequency);
-                        tagIds.push(tag._id)
-                        req.body.tags = tagIds
-                    } else{
-                        const newTag = await tagDao.createNewTag(tags[i - 1])
-                        const id = await tagDao.findTagIdByTagName(tags[i-1])
-                        tagIds.push(id[0]._id)
-                        req.body.tags = tagIds
-                    }
-                })
+        for (let tag of tags) {
+            const isTagPresent = await tagDao.findTagByName(tag);
+            if(isTagPresent) {
+                const frequency = isTagPresent.frequency + 1;
+                await tagDao.updateTagStats(isTagPresent._id, frequency);
+                tagIds.push(isTagPresent._id);
+            }
+            else {
+                await tagDao.createNewTag(tag);
+                const id = await tagDao.findTagIdByTagName(tag);
+                tagIds.push(id[0]._id)
+            }
         }
-        );
-
-        console.log(tagIds)
-        //req.body.tags = tagIds
-        //console.log(req.body)
-        // TuitController.tuitDao.createTuitByUser(userId, req.body)
-        //     .then((tuit: Tuit) => res.json(tuit));
-        // return res.status(20)
+        req.body.tags = tagIds
+        console.log(req.body)
+        TuitController.tuitDao.createTuitByUser(userId, req.body)
+            .then((tuit: Tuit) => res.json(tuit));
+        return res.status(200);
     }
 
     /**
