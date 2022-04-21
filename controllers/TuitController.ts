@@ -93,31 +93,6 @@ export default class TuitController implements TuitControllerI {
     }
 
 
-    getTagIDsHelper = async(promises: any[], tags: any[]) =>{
-        const tagIds: any[] = []
-        const tagDao = TuitController.tagDao
-
-        return Promise.all(promises).then((item) => {
-                let i = 0;
-                item.forEach(async tag => {
-                    i += 1;
-                    if(tag){
-                        const frequency = tag.frequency + 1
-                        tagIds.push(tag._id)
-                        const updateTagStatus =  await tagDao.updateTagStats(tag._id, frequency);
-                    } else{
-                        const newTag = await tagDao.createNewTag(tags[i - 1])
-                        const id = await tagDao.findTagIdByTagName(tags[i-1])
-                        tagIds.push(id[0]._id)
-
-                    }
-                })
-                console.log('Tag IDs from get tag ids helper:', tagIds);
-                return tagIds;
-            }
-        );
-
-    }
     /**
      * @param {Request} req Represents request from client, including body
      * containing the JSON object for the new tuit to be inserted in the
@@ -153,7 +128,6 @@ export default class TuitController implements TuitControllerI {
             }
         }
         req.body.tags = tagIds
-        console.log(req.body)
         TuitController.tuitDao.createTuitByUser(userId, req.body)
             .then((tuit: Tuit) => res.json(tuit));
         return res.status(200);

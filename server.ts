@@ -83,7 +83,6 @@ const userController = UserController.getInstance(app);
 const tuitController = TuitController.getInstance(app);
 const likesController = LikeController.getInstance(app);
 const dislikeController = DislikeController.getInstance(app);
-
 SessionController(app);
 AuthenticationController(app);
 GroupController(app);
