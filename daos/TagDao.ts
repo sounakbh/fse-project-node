@@ -27,6 +27,7 @@ export default class TagDao implements TagDaoI {
     private constructor() {
     }
 
+
     /**
      * Uses TagModel to retrieve all Tag documents from Tags collection
      * @returns Promise To be notified when the Tags are retrieved from
