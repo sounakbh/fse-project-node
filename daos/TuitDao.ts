@@ -43,5 +43,7 @@ export default class TuitDao implements TuitDaoI {
       tags: {
         $all: [tagid],
       },
-    });
+    })
+      .populate("postedBy")
+      .exec();
 }
