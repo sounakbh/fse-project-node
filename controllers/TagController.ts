@@ -1,29 +1,27 @@
 /**
- * @file Controller RESTful Web service API for tuits resource
+ * @file Controller RESTful Web service API for tags resource
  */
 import {Express, Request, Response} from "express";
 import TagControllerI from "../interfaces/TagControllerI";
 import TagDao from "../daos/TagDao";
+import Tag from "../models/tags/Tag";
 
 /**
- * @class TagController Implements RESTful Web service API for tuits resource.
+ * @class TagController Implements RESTful Web service API for tags resource.
  * Defines the following HTTP endpoints:
  * <ul>
- *     <li>POST /api/users/:uid/tuits to create a new tuit instance for
- *     a given user</li>
- *     <li>GET /api/tuits to retrieve all the tuit instances</li>
- *     <li>GET /api/tuits/:tid to retrieve a particular tuit instances</li>
- *     <li>GET /api/users/:uid/tuits to retrieve tuits for a given user </li>
- *     <li>PUT /api/tuits/:tid to modify an individual tuit instance </li>
- *     <li>DELETE /api/tuits/:tid to remove a particular tuit instance</li>
+ *     <li>GET /api/tags to retrieve all the tag instances</li>
+ *     <li>GET /api/tags/trending to retrieve top 3 recent tag instances</li>
  * </ul>
- * @property {TuitDao} tuitDao Singleton DAO implementing tuit CRUD operations
- * @property {TagController} tuitController Singleton controller implementing
+ * @property {TagDao} tagDao Singleton DAO implementing tag CRUD operations
+ * @property {TagController} tagController Singleton controller implementing
  * RESTful Web service API
  */
+
 export default class TagController implements TagControllerI {
     private static tagDao: TagDao = TagDao.getInstance();
     private static tagController: TagController | null = null;
+    private static readonly NUM_TRENDING_TAGS = 3;
 
     /**
      * Creates singleton controller instance
@@ -36,8 +34,6 @@ export default class TagController implements TagControllerI {
             TagController.tagController = new TagController();
             app.get("/api/tags", TagController.tagController.findAllTags);
             app.get("/api/tags/trending", TagController.tagController.findTrendingTags);
-            app.post("/api/tags", TagController.tagController.createNewTag);
-            app.put("/api/tags/:tagId", TagController.tagController.updateTagStats);
         }
         return TagController.tagController;
     }
@@ -45,48 +41,26 @@ export default class TagController implements TagControllerI {
     private constructor() {}
 
     /**
-     * Retrieves all tuits from the database and returns an array of tuits.
+     * Retrieves all tags from the database and returns an array of tags.
      * @param {Request} req Represents request from client
      * @param {Response} res Represents response to client, including the
-     * body formatted as JSON arrays containing the tuit objects
+     * body formatted as JSON arrays containing the tag objects
      */
     findAllTags = (req: Request, res: Response) => {
-        //  TagController.tagDao.findAllTags()
-        //             .then((tags: Tag[]) => res.json(tags));
+        console.log("Find all tags reached!")
+          return TagController.tagDao.findAllTags()
+                     .then((tags: Tag[]) => res.json(tags));
     }
 
     /**
-     * @param {Request} req Represents request from client, including path
-     * parameter tid identifying the primary key of the tuit to be retrieved
+     * Retrieves the recent trending tag instances from the database and returns an array of tags.
+     * @param {Request} req Represents request from client
      * @param {Response} res Represents response to client, including the
-     * body formatted as JSON containing the tuit that matches the user ID
+     * body formatted as JSON arrays containing the tag objects
      */
     findTrendingTags = (req: Request, res: Response) => {
-        //  TagController.tagDao.findTrendingTags()
-        //             .then((tags: Tag[]) => res.json(tags));
-    }
-    /**
-     * @param {Request} req Represents request from client, including body
-     * containing the JSON object for the new tuit to be inserted in the
-     * database
-     * @param {Response} res Represents response to client, including the
-     * body formatted as JSON containing the new tuit that was inserted in the
-     * database
-     */
-    createNewTag = (req: Request, res: Response) => {
-        //  TagController.tagDao.createNewTag()
-        //             .then((tags: Tag[]) => res.json(tags));
-    }
-
-    /**
-     * @param {Request} req Represents request from client, including path
-     * parameter tid identifying the primary key of the tuit to be modified
-     * @param {Response} res Represents response to client, including status
-     * on whether updating a tuit was successful or not
-     */
-    updateTagStats = (req: Request, res: Response) => {
-        // TagController.tagDao.updateTagStats(req.params.tagId, req.body)
-        //             .then((status) => res.send(status));
+        return TagController.tagDao. findTrendingTags(TagController.NUM_TRENDING_TAGS)
+                     .then((tags: Tag[]) => res.json(tags));
     }
 
 };

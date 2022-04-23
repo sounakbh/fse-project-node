@@ -16,6 +16,7 @@ import UserController from "./controllers/UserController";
 import TuitController from "./controllers/TuitController";
 import LikeController from "./controllers/LikeController";
 import DislikeController from "./controllers/DislikeController";
+import TagController from "./controllers/TagController";
 import SessionController from "./controllers/SessionController";
 import AuthenticationController from "./controllers/AuthenticationController";
 import mongoose from "mongoose";
@@ -83,6 +84,8 @@ const userController = UserController.getInstance(app);
 const tuitController = TuitController.getInstance(app);
 const likesController = LikeController.getInstance(app);
 const dislikeController = DislikeController.getInstance(app);
+const tagController = TagController.getInstance(app);
+
 SessionController(app);
 AuthenticationController(app);
 GroupController(app);
