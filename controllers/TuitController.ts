@@ -189,6 +189,13 @@ export default class TuitController implements TuitControllerI {
       .then((status) => res.send(status));
   };
 
+  /**
+   * Retrieves all tuits from the database for the tranding tags and returns
+   * an array of tuits.
+   * @param {Request} req Represents request from client, with just the api end point
+   * @param {Response} res Represents response to client, including status
+   * on whether finding the tuits was successful or not
+   */
   findTrendingTuits = async (req: Request, res: Response) => {
     try{
       let tuits: any[] = []
