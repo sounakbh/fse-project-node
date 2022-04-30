@@ -179,7 +179,6 @@ export default class TuitController implements TuitControllerI {
    */
   findAllTuitsByTagID = async (req: Request, res: Response) => {
     const tagName = req.params.tagName;
-    // get Tag ID
     const tagIDResponse = await TuitController.tagDao.findTagIdByTagName(
       tagName
     );
@@ -201,7 +200,7 @@ export default class TuitController implements TuitControllerI {
       let tuits: any[] = []
       const trendingTags = await  TuitController.tagDao.findTrendingTags( 4);
 
-      for (var tag in trendingTags){
+      for (let tag in trendingTags){
         const tag_tuits = await TuitController.tuitDao.findAllTuitsByTagID(trendingTags[tag]._id)
         tuits = tuits.concat(tag_tuits)
       }
