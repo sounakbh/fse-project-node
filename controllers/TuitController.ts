@@ -53,6 +53,7 @@ export default class TuitController implements TuitControllerI {
       );
       app.put("/api/tuits/:uid", TuitController.tuitController.updateTuit);
       app.delete("/api/tuits/:uid", TuitController.tuitController.deleteTuit);
+      app.get("/api/trending/tuits", TuitController.tuitController.findTrendingTuits);
     }
     return TuitController.tuitController;
   };
@@ -168,9 +169,16 @@ export default class TuitController implements TuitControllerI {
       .deleteTuit(req.params.uid)
       .then((status) => res.send(status));
 
+  /**
+   * Retrieves all tuits from the database for a particular tag and returns
+   * an array of tuits.
+   * @param {Request} req Represents request from client, including the path parameter
+   * tag name that acts as the primary key
+   * @param {Response} res Represents response to client, including status
+   * on whether finding the tuits by tag name was successful or not
+   */
   findAllTuitsByTagID = async (req: Request, res: Response) => {
     const tagName = req.params.tagName;
-    // get Tag ID
     const tagIDResponse = await TuitController.tagDao.findTagIdByTagName(
       tagName
     );
@@ -179,4 +187,28 @@ export default class TuitController implements TuitControllerI {
       .findAllTuitsByTagID(tagID)
       .then((status) => res.send(status));
   };
+
+  /**
+   * Retrieves all tuits from the database for the tranding tags and returns
+   * an array of tuits.
+   * @param {Request} req Represents request from client, with just the api end point
+   * @param {Response} res Represents response to client, including status
+   * on whether finding the tuits was successful or not
+   */
+  findTrendingTuits = async (req: Request, res: Response) => {
+    try{
+      let tuits: any[] = []
+      const trendingTags = await  TuitController.tagDao.findTrendingTags( 4);
+
+      for (let tag in trendingTags){
+        const tag_tuits = await TuitController.tuitDao.findAllTuitsByTagID(trendingTags[tag]._id)
+        tuits = tuits.concat(tag_tuits)
+      }
+      res.send(tuits)
+    }catch (e) {
+      res.sendStatus(404);
+    }
+
+  };
+
 }
