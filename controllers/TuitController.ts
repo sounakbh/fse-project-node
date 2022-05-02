@@ -204,7 +204,11 @@ export default class TuitController implements TuitControllerI {
         const tag_tuits = await TuitController.tuitDao.findAllTuitsByTagID(trendingTags[tag]._id)
         tuits = tuits.concat(tag_tuits)
       }
-      res.send(tuits)
+     const uniqueTuits =  Array.from(new Set(tuits.map(a => a.id)))
+          .map(id => {
+            return tuits.find(a => a.id === id)
+          })
+      res.send(uniqueTuits)
     }catch (e) {
       res.sendStatus(404);
     }
